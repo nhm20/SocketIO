@@ -38,6 +38,7 @@ io.on('connection', (socket) => {
           socket.join(room);
           callback(`Joined room ${room}`);   
      });
+     socket.on("ping", n => console.log(n));
 });
 
 instrument(io, {
