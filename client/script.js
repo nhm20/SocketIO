@@ -6,6 +6,7 @@ const roomInput = document.getElementById('room-input');
 const form = document.getElementById('form');
 
 const socket = io('http://localhost:3000');
+const userSocket = io('http://localhost:3000/user');
 socket.on('connect', () => {
      displayMessage(`You are connected with id:${socket.id}`);
      // socket.emit("custom-event", 10, "Hi", { a: "a" });
@@ -31,7 +32,6 @@ joinRoomButton.addEventListener('click', () => {
           displayMessage(message);
      });
 })
-
 
 function displayMessage(message) {
      const div = document.createElement('div');
