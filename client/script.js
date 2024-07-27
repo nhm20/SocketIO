@@ -8,9 +8,9 @@ const form = document.getElementById('form');
 const socket = io('http://localhost:3000');
 socket.on('connect', () => {
      displayMessage(`You are connected with id:${socket.id}`);
+     // socket.emit("custom-event", 10, "Hi", { a: "a" });
 });
 
-socket.emit('custom-event',10,'Hi',{a:'a'});
 
 form.addEventListener('submit', (e) => {
      e.preventDefault();
@@ -18,12 +18,14 @@ form.addEventListener('submit', (e) => {
      const room = roomInput.value;
      if (message === "") return;
      displayMessage(message);
+     socket.emit("send-message", message);
      messageInput.value = '';
 });
      
 joinRoomButton.addEventListener('click', () => {
      const room = roomInput.value;
 })
+
 
 function displayMessage(message) {
      const div = document.createElement('div');
