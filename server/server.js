@@ -1,48 +1,46 @@
-const { instrument }= require('@socket.io/admin-ui');
-const io = require('socket.io')(3000, {
-     cors: {
-          origin: ['http://localhost:8081'],
-          credentials: true
-     }
-});  
+import { Server } from "socket.io";
+import http from "http";
+import express from "express";
+import cors from "cors";
 
-const userIo = io.of('/user');
-userIo.on('connection', socket => {
-     console.log("connected to user namespace with username "+socket.username);
-})
+const app = express();
+app.use(cors());
 
+const server = http.createServer(app);
 
-userIo.use((socket, next) => {
-     if (socket.handshake.auth.token) {
-          socket.username = getUsernameFromToken(socket.handshake.auth.token);
-          next();
-     }
-     else {
-          next(new Error("Please send token"));
-     }
-})
-function getUsernameFromToken(token) {
-     return token;
-}
-
-io.on('connection', (socket) => {
-     console.log('New user connected', socket.id);
-     socket.on('send-message', (message, room) => {
-          if(room==='')
-          socket.broadcast.emit('receive-message', message);
-          else {
-               socket.to(room).emit('receive-message', message);
-          }
-     });
-     socket.on('join-room', (room,callback) => {
-          socket.join(room);
-          callback(`Joined room ${room}`);   
-     });
-     socket.on("ping", n => console.log(n));
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:5173"],
+  },
 });
 
-instrument(io, {
-     auth: false,
-     mode:"development"
+io.on("connection", (socket) => {
+  console.log("✅ New user connected:", socket.id);
+
+  socket.on("custom-event", (num, str, obj) => {
+    console.log("📩 Custom Event:", num, str, obj);
+  });
+
+  socket.on("send-message", ({ message, room }) => {
+    if (room) {
+      socket.to(room).emit("receive-message", message);
+      console.log(`📨 Room ${room}: ${message}`);
+    } else {
+      socket.broadcast.emit("receive-message", message);
+      console.log(`📨 Broadcast from ${socket.id}: ${message}`);
+    }
+  });
+
+  socket.on("join-room", (room) => {
+    socket.join(room);
+    console.log(`🔗 ${socket.id} joined room: ${room}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ User disconnected:", socket.id);
+  });
 });
 
+server.listen(3000, () => {
+  console.log("🚀 Socket.IO server running on http://localhost:3000");
+});    
