@@ -31,15 +31,6 @@ const ChatApp = () => {
   const handleSend = (e) => {
     e.preventDefault();
     if (!messageInput || !socket) return;
-
-    const data = {
-      message: messageInput,
-      room: roomInput || null,
-    };
-
-    socket.emit("send-message", data);
-    displayMessage(`🧑 You: ${messageInput}`);
-    setMessageInput("");
   };
 
   const handleJoinRoom = () => {
